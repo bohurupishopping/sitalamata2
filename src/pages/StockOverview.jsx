@@ -1,38 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { fetchItems, fetchSales, fetchPurchases } from "../services/firebaseService";
-import { useAuth } from "../contexts/AuthContext";
+import React, { useState } from "react"; // Add useState import
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 import Sidebar from "../components/Sidebar";
+import { useData } from "../hooks/useData";
+import { usePagination } from "../hooks/usePagination";
 
 export default function StockOverview() {
-  const { currentUser } = useAuth();
-  const [items, setItems] = useState([]);
-  const [sales, setSales] = useState([]);
-  const [purchases, setPurchases] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [itemsData, salesData, purchasesData] = await Promise.all([
-          fetchItems(),
-          fetchSales(),
-          fetchPurchases(),
-        ]);
-        setItems(itemsData);
-        setSales(salesData);
-        setPurchases(purchasesData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const { items, sales, purchases, loading } = useData();
+  const { currentItems, currentPage, paginate, totalPages } = usePagination(items);
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Add state for sidebar
 
   const calculateTotalPurchaseQty = (itemId) => {
     return purchases
@@ -121,7 +97,7 @@ export default function StockOverview() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
+      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} /> {/* Pass setOpen prop */}
       <div className={`transition-all duration-200 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
         <div className="p-6">
           <h1 className="text-2xl font-bold mb-6 text-gray-800">Stock Overview</h1>
@@ -151,7 +127,7 @@ export default function StockOverview() {
                 </tr>
               </thead>
               <tbody>
-                {items.map((item) => {
+                {currentItems.map((item) => {
                   const totalPurchaseQty = calculateTotalPurchaseQty(item.id);
                   const totalSales = sales
                     .filter((sale) => sale.itemId === item.id)
@@ -175,6 +151,23 @@ export default function StockOverview() {
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-center mt-6">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => paginate(i + 1)}
+                className={`mx-1 px-4 py-2 rounded-lg ${
+                  currentPage === i + 1
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
           </div>
         </div>
       </div>
