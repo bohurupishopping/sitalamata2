@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // Add useState import
+import React, { useState } from "react";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 import Sidebar from "../components/Sidebar";
@@ -8,7 +8,7 @@ import { usePagination } from "../hooks/usePagination";
 export default function StockOverview() {
   const { items, sales, purchases, loading } = useData();
   const { currentItems, currentPage, paginate, totalPages } = usePagination(items);
-  const [sidebarOpen, setSidebarOpen] = useState(true); // Add state for sidebar
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const calculateTotalPurchaseQty = (itemId) => {
     return purchases
@@ -97,78 +97,101 @@ export default function StockOverview() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} /> {/* Pass setOpen prop */}
-      <div className={`transition-all duration-200 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
-        <div className="p-6">
-          <h1 className="text-2xl font-bold mb-6 text-gray-800">Stock Overview</h1>
+      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
+      {/* Add padding-bottom to account for mobile bottom navigation */}
+      <div className={`transition-all duration-200 ${sidebarOpen ? "md:ml-64" : "md:ml-20"} p-4 md:p-6 pb-20 md:pb-6`}>
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row items-center justify-between mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center mb-4 md:mb-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 md:h-10 md:w-10 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+            </svg>
+            Stock Overview
+          </h1>
           <button
             onClick={handleExportPDF}
-            className="mb-6 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center"
           >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
             Export PDF
           </button>
+        </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-600">
-                    Item
-                  </th>
-                  <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-600">
-                    Purchase Quantity
-                  </th>
-                  <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-600">
-                    Total Sales
-                  </th>
-                  <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-sm font-semibold text-gray-600">
-                    Closing Stock
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((item) => {
-                  const totalPurchaseQty = calculateTotalPurchaseQty(item.id);
-                  const totalSales = sales
-                    .filter((sale) => sale.itemId === item.id)
-                    .reduce((sum, sale) => sum + sale.quantity, 0);
-                  const closingStock = totalPurchaseQty - totalSales;
+        {/* Stock Table */}
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="p-4 md:p-6">
+            <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Stock Details
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="bg-gradient-to-r from-blue-500 to-blue-600">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white uppercase tracking-wider">Item</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white uppercase tracking-wider">Purchase Quantity</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white uppercase tracking-wider">Total Sales</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white uppercase tracking-wider">Closing Stock</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {currentItems.map((item) => {
+                    const totalPurchaseQty = calculateTotalPurchaseQty(item.id);
+                    const totalSales = sales
+                      .filter((sale) => sale.itemId === item.id)
+                      .reduce((sum, sale) => sum + sale.quantity, 0);
+                    const closingStock = totalPurchaseQty - totalSales;
 
-                  return (
-                    <tr key={item.id} className="hover:bg-gray-50 transition-colors duration-200">
-                      <td className="px-6 py-4 border-b border-gray-200">{item.name}</td>
-                      <td className="px-6 py-4 border-b border-gray-200">
-                        {totalPurchaseQty} {item.unit || ""}
-                      </td>
-                      <td className="px-6 py-4 border-b border-gray-200">
-                        {totalSales} {item.unit || ""}
-                      </td>
-                      <td className="px-6 py-4 border-b border-gray-200">
-                        {closingStock} {item.unit || ""}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                    return (
+                      <tr key={item.id} className="hover:bg-gray-50 transition-colors duration-200">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-800">{item.name}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                          {totalPurchaseQty} {item.unit || ""}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                          {totalSales} {item.unit || ""}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold">
+                          <span className={`px-3 py-1 rounded-full text-sm ${
+                            closingStock > 10 ? "bg-green-100 text-green-700" :
+                            closingStock > 0 ? "bg-yellow-100 text-yellow-700" :
+                            "bg-red-100 text-red-700"
+                          }`}>
+                            {closingStock} {item.unit || ""}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
+        </div>
 
-          {/* Pagination */}
-          <div className="flex justify-center mt-6">
+        {/* Pagination */}
+        <div className="flex justify-center mt-6">
+          <nav className="inline-flex rounded-md shadow-sm">
             {Array.from({ length: totalPages }, (_, i) => (
               <button
                 key={i + 1}
                 onClick={() => paginate(i + 1)}
-                className={`mx-1 px-4 py-2 rounded-lg ${
+                className={`px-4 py-2 border border-gray-200 text-sm font-medium ${
                   currentPage === i + 1
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    ? "bg-blue-500 text-white border-blue-500"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
+                } ${i === 0 ? "rounded-l-md" : ""} ${
+                  i === totalPages - 1 ? "rounded-r-md" : ""
                 }`}
               >
                 {i + 1}
               </button>
             ))}
-          </div>
+          </nav>
         </div>
       </div>
     </div>
